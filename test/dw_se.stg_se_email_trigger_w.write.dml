@@ -1,0 +1,19 @@
+record
+//string("\007")[integer(1)] vec_content;
+  decimal("\007") euid;
+  decimal("\007") item_id = NULL("");
+  string("\007") sndr_mail = NULL("");
+  string("\007") recvr_mail = NULL("");
+  decimal("\007") sndr_user_id = NULL("");
+  decimal("\007") recvr_user_id = NULL("");
+  string("\007") sndr_login_name = NULL("");
+  string("\007") recvr_login_name = NULL("");
+  decimal("\007") email_type = NULL("");
+  string("\007") machine_ip = NULL("");
+  decimal("\007") site_id = NULL("");
+  string("\007") content_type = NULL("");
+  datetime("YYYY-MM-DD HH24:MI:SS")("\007") trigger_time = NULL("");
+  decimal("\007") peuid = NULL("");  
+  string("\007") email_trggr_tag_txt = NULL("");
+ string("\007") record_update_flg = 'P' /*VARCHAR(2) CHARACTER SET LATIN*/;
+end;
