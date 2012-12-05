@@ -4,6 +4,22 @@ options {
 	backtrack = true;
 }
 
+@header {
+import java.util.HashMap;
+}
+
+@members {
+HashMap symtable = new HashMap();
+int indentlevel = 0;
+
+public void output(String s) {
+    for (int i = 0; i < indentlevel; i++) {
+        System.out.print("    ");
+    }
+    System.out.println(s);
+}
+}
+
 top_level
 	:	type opt_semicolon | declaration_list
 	;
@@ -23,7 +39,7 @@ type	returns [String typename, Object value, Object extra]
 base_type returns [String typename, Object value, Object extra]
 	:	native_type
 		{
-			$typename = "native";
+			$typename = $native_type.typename;
 		}
 	|
 		binary_integer_type
@@ -334,8 +350,10 @@ null_expr
 	:	'NULL'
 	;
 
-native_type
-    :   sign_spec? ('char' | 'short' | 'int' | 'long') | 'float' | 'double'
+native_type returns [String typename]
+    :   sign_spec? ('char' {$typename="char";} | 'short' {$typename="short";} | 'int' {$typename="int";} | 'long' {$typename="long"}) 
+    		    |   'float' {$typename = "float";}
+    		    |   'double' {$typename ="double";}
     ;
 
 binary_integer_type
@@ -442,7 +460,28 @@ variable_declaration_list
 	;
 
 variable_declaration
-	:	'let' type ID ('=' expression)? ';'
+	:	'let' t=type ID (a='=' expression)? ';' 
+		{
+			// TODO: get expression value
+			if ($a != null) {
+				if ($t.typename.equals("string")) {
+					output($ID.text + "= StringVar(" + $t.extra + ", " + "" + ")");
+				} else if ($t.typename.equals("decimal")) {
+					output($ID.text + "= DecimalVar(" + $t.extra + ", " + "" + ")");
+				} else if ($t.typename.equals("int")) {
+					output($ID.text + "=0");
+				}
+			
+			} else {
+				if ($t.typename.equals("string")) {
+					output($ID.text + "= StringVar(" + $t.extra + ")");
+				} else if ($t.typename.equals("decimal")) {
+					output($ID.text + "= DecimalVar(" + $t.extra + ")");
+				} else if ($t.typename.equals("int")) {
+					output($ID.text + "=0");
+				}
+			}
+		}
 	;
 
 xfr_statement_list
