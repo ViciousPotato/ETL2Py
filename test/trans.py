@@ -1,80 +1,54 @@
 //let decimal(20) negative_num = 0 - this_partition();
 
-temp_euid = StringVar(32)
+temp_euid = StringVar() # igonore ints
 temp_item_id = StringVar("\007")
 temp_sndr_mail = StringVar("\007")
+temp_recvr_user_id = DecimalVar("\007")
+...
+temp_parse_var = StringVar()
+temp_email_trigger_tag = StringVar("\007", "")
 
+i = 0
+multi_item_index = 0
+temp_multi_item_id = StringVar("\007")
 
-out::reformat(in) =
-begin
+vec_content = string_split(in.trigger_content, "\007")
+vec_lenght = length_of(vec_content)
 
-    let string(32) temp_euid;
-    let string("\007") temp_item_id;
-    let string("\007") temp_sndr_mail;
-    let string("\007") temp_recvr_mail;
-    let decimal("\007") temp_sndr_user_id;
-    let decimal("\007") temp_recvr_user_id;
-    let string("\007") temp_sndr_login_name;
-    let string("\007") temp_recvr_login_name;
-    let decimal("\007") temp_email_type;
-    let string("\007") temp_machine_ip;
-    let decimal("\007") temp_site_id;
-    let string("\007") temp_content_type;
-    let string("\007") temp_trigger_time;
-    let string("\007") temp_peuid;
-  
-    let string(int) temp_parse_var;
-    let string("\007") temp_email_trigger_tag = "";
-    let int i ;   
-    let int multi_item_index=0 ;
-    let string("\007") temp_multi_item_id;
-
-    let string("\007")[integer(1)] vec_content = string_split(in.trigger_content,"\007");
-    let int vec_lenght = length_of(vec_content);
-    
-    if (is_defined(vec_lenght)==1 )
-    begin  
-       i = 14 ;
-       while(i < vec_lenght)
-         begin           
-            if (i == 14 ) 
-               begin 
-                 temp_email_trigger_tag = vec_content[i] ;
-                end 
-            else 
-               begin
-                 temp_email_trigger_tag =string_concat(temp_email_trigger_tag, "&", vec_content[i]);
-               end              
-          i= i+1;
-         end 
-    end
+if is_defined(vec_content) == 1:
+    i= 14
+    while i < vec_lenght:
+        if i == 14:
+            temp_email_trigger_tag.assign(vec_content[i])
+        else:
+            temp_email_trigger_tag.assign(string_concat(temp_email_trigger_tag, "&", vec_content[i]))
+        
+        i= i+1;
 
     // handle multi item records
 
-    temp_parse_var = re_get_match(in.trigger_content, "item_id=[[:print:]]+");
-    temp_item_id   =  re_replace_first(temp_parse_var, "item_id=","");
-    multi_item_index = string_index(temp_item_id, ",");
+    temp_parse_var.assign(re_get_match(in.trigger_content, "item_id=[[:print:]]+"))
+
+    temp_parse_var.assign(re_get_match(in.trigger_content, "item_id=[[:print:]]+"))
+    temp_item_id.assign(re_replace_first(temp_parse_var, "item_id=",""))
+    multi_item_index.assign(string_index(temp_item_id, ","))
 
     /* If multi item_index is not null then item_tag is having multiple item.
        if multiple item found 
            1) add temp_item_id to temp_email_trigger_tag
            2) replace temp_item_id to null 
     */
+    if is_defined(multi_item_index) == 1:
+        if multi_item_index > 0:
+            temp_multi_item_id.assign(temp_item_id)
+            temp_multi_item_id.assign(temp_parse_var)
+            temp_item_id.assign("")
 
-    if ( is_defined(multi_item_index) == 1 )      
-    begin
-     if (multi_item_index > 0)
-       begin
-         temp_multi_item_id = temp_item_id ;       
-         temp_multi_item_id = temp_parse_var ;       
-         temp_item_id = "" ;
-
-         if (temp_email_trigger_tag == "")
-             temp_email_trigger_tag = temp_multi_item_id ;
+         if temp_email_trigger_tag == "":
+             temp_email_trigger_tag.assign(temp_multi_item_id)
          else
-             temp_email_trigger_tag = string_concat(temp_email_trigger_tag, "&", temp_multi_item_id);
-       end ;
-    end ;
+             temp_email_trigger_tag.assign(string_concat(temp_email_trigger_tag, "&", temp_multi_item_id))
+
 
     /* identify position of euid=,if its null then assign euid='-9999' and store whole text as part of temp_tag_19plus */
     // let int pos_euid = string_index(vec_content[0], "euid=");
