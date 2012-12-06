@@ -113,9 +113,12 @@ slot returns [String expr]
 
 // ------------------------- Expressions ---------------------------------------------------
 
-primary_expression
+primary_expression returns [String expr]
 	:	constant_expr
 	|	funcall_expr
+		{
+			$expr = $funcall_expr.expr;
+		}
 	|	variable_expr
 	|	unarycall
 	|	cast_expr
@@ -169,7 +172,9 @@ make_vector_expr
 expression returns [String expr]
 	:	
 		(
-			primary_expression (
+			primary_expression
+			{$expr = $primary_expression.expr;}
+			(
 				('.' (name+ | '*')) // field_expr
 			| 
 				(binop expression) // binarycall
@@ -351,7 +356,7 @@ null_expr
 	;
 
 native_type returns [String typename]
-    :   sign_spec? ('char' {$typename="char";} | 'short' {$typename="short";} | 'int' {$typename="int";} | 'long' {$typename="long"}) 
+    :   sign_spec? ('char' {$typename="char";} | 'short' {$typename="short";} | 'int' {$typename="int";} | 'long' {$typename="long";}) 
     		    |   'float' {$typename = "float";}
     		    |   'double' {$typename ="double";}
     ;

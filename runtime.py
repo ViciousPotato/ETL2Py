@@ -1,5 +1,8 @@
 import re
 
+# global variables
+null = None
+
 # basic classes
 class StringVar(object):
 	def __init__(self, separator, init_val=""):
@@ -23,7 +26,15 @@ class DecimalVar(object):
 		super(DecimalVar, self).__init__()
 		
 		self.separator = separator
-		self.init_val = init_val
+		self.val = init_val
+
+	def assign(self, obj):
+		if isinstance(obj, DecimalVar):
+			self.val = obj.val
+		elif isinstance(obj, (int, long, float)):
+			self.val = obj
+		else:
+			raise Exception('Unknown type assigned to decimal')
 		
 
 # string functions
